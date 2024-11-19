@@ -1,0 +1,105 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:user_id",
+ "creation": "2024-10-31 11:48:04.459080",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "user_name",
+  "user_surname",
+  "user_dni",
+  "user_phone",
+  "user_email",
+  "user_birthdate",
+  "user_id",
+  "user_fullname",
+  "user_role",
+  "moodle_user_course"
+ ],
+ "fields": [
+  {
+   "fieldname": "user_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Nombre de Usuario",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "user_fullname",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Nombre Completo",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user_name",
+   "fieldtype": "Data",
+   "label": "Nombre"
+  },
+  {
+   "fieldname": "user_surname",
+   "fieldtype": "Data",
+   "label": "Apellidos"
+  },
+  {
+   "fieldname": "user_email",
+   "fieldtype": "Data",
+   "label": "Correo Electr\u00f3nico"
+  },
+  {
+   "fieldname": "user_phone",
+   "fieldtype": "Data",
+   "label": "Tel\u00e9fono"
+  },
+  {
+   "fieldname": "user_dni",
+   "fieldtype": "Data",
+   "label": "DNI"
+  },
+  {
+   "fieldname": "user_birthdate",
+   "fieldtype": "Date",
+   "label": "Fecha de Nacimiento"
+  },
+  {
+   "fieldname": "user_role",
+   "fieldtype": "Select",
+   "label": "Rol del Usuario",
+   "options": "Student\nTeacher\nManager\nAdministrator",
+   "read_only": 1
+  },
+  {
+   "fieldname": "moodle_user_course",
+   "fieldtype": "Table",
+   "label": "Cursos de Moodle",
+   "options": "Moodle User Course"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-11-03 20:05:07.789622",
+ "modified_by": "Administrator",
+ "module": "Moodle Integration",
+ "name": "Moodle User",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

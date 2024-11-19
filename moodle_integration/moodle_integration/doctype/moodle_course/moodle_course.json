@@ -1,0 +1,98 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-10-31 11:53:24.975036",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "course_status",
+  "course_name",
+  "course_instance",
+  "course_code",
+  "course_start_date",
+  "course_end_date",
+  "section_break_xtcy",
+  "estudiantes",
+  "course_teachers"
+ ],
+ "fields": [
+  {
+   "fieldname": "course_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "C\u00f3digo del Curso",
+   "reqd": 1
+  },
+  {
+   "fieldname": "course_name",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Nombre del Curso",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "course_status",
+   "fieldtype": "Check",
+   "label": "Habilitado"
+  },
+  {
+   "fieldname": "course_start_date",
+   "fieldtype": "Date",
+   "label": "Fecha Inicio"
+  },
+  {
+   "fieldname": "course_end_date",
+   "fieldtype": "Date",
+   "label": "Fecha Fin"
+  },
+  {
+   "fieldname": "course_instance",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Aula Virtual",
+   "options": "Moodle Instance",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_xtcy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "estudiantes",
+   "fieldtype": "Table",
+   "label": "Estudiantes",
+   "options": "Moodle Students Course"
+  },
+  {
+   "fieldname": "course_teachers",
+   "fieldtype": "Table",
+   "label": "Profesores",
+   "options": "Moodle Teachers Course"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-11-02 11:55:23.695401",
+ "modified_by": "Administrator",
+ "module": "Moodle Integration",
+ "name": "Moodle Course",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
