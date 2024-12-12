@@ -1,50 +1,54 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:site_name",
- "creation": "2024-10-31 11:33:35.489015",
+ "autoname": "field:role_name",
+ "creation": "2024-10-31 11:56:14.763585",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "site_name",
-  "site_abreviatura",
-  "site_url",
-  "api_key"
+  "role_name",
+  "role_shortname",
+  "role_id",
+  "role_instance",
+  "role_description"
  ],
  "fields": [
   {
-   "fieldname": "site_name",
+   "fieldname": "role_name",
    "fieldtype": "Data",
-   "label": "Nombre del Aula",
-   "reqd": 1,
+   "label": "Nombre del Rol",
    "unique": 1
   },
   {
-   "fieldname": "site_url",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "URL del Aula",
-   "reqd": 1
+   "fieldname": "role_instance",
+   "fieldtype": "Link",
+   "label": "Aula Virtual",
+   "options": "Moodle Instance"
   },
   {
-   "fieldname": "api_key",
-   "fieldtype": "Data",
-   "label": "API KEY"
+   "fieldname": "role_description",
+   "fieldtype": "Small Text",
+   "label": "Descripci\u00f3n"
   },
   {
-   "fieldname": "site_abreviatura",
+   "fieldname": "role_shortname",
    "fieldtype": "Data",
-   "label": "Abreviatura del Aula",
-   "reqd": 1,
+   "label": "Nombre Corto del Rol ",
+   "unique": 1
+  },
+  {
+   "fieldname": "role_id",
+   "fieldtype": "Data",
+   "label": "Identificador del Rol",
    "unique": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-12-02 11:00:17.692223",
+ "modified": "2024-11-26 09:19:12.075067",
  "modified_by": "Administrator",
  "module": "Moodle Integration",
- "name": "Moodle Instance",
+ "name": "Moodle User Role",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [

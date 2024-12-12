@@ -1,37 +1,37 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:user_id",
+ "autoname": "field:moodle_user_id",
  "creation": "2024-10-31 11:48:04.459080",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "user_profile",
+  "perfil_de_erp",
   "user_name",
   "user_surname",
+  "user_fullname",
   "user_dni",
   "user_phone",
   "user_email",
   "user_birthdate",
   "user_id",
-  "user_fullname",
-  "user_role",
+  "moodle_user_id",
+  "user_instance",
+  "user_type",
   "moodle_user_course"
  ],
  "fields": [
   {
    "fieldname": "user_id",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Nombre de Usuario",
-   "read_only": 1,
    "unique": 1
   },
   {
    "fieldname": "user_fullname",
    "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Nombre Completo",
-   "read_only": 1
+   "label": "Nombre Completo"
   },
   {
    "fieldname": "user_name",
@@ -64,22 +64,44 @@
    "label": "Fecha de Nacimiento"
   },
   {
-   "fieldname": "user_role",
-   "fieldtype": "Select",
-   "label": "Rol del Usuario",
-   "options": "Student\nTeacher\nManager\nAdministrator",
-   "read_only": 1
-  },
-  {
    "fieldname": "moodle_user_course",
    "fieldtype": "Table",
    "label": "Cursos de Moodle",
    "options": "Moodle User Course"
+  },
+  {
+   "fieldname": "user_profile",
+   "fieldtype": "Button",
+   "label": "Perfil de Moodle"
+  },
+  {
+   "fieldname": "perfil_de_erp",
+   "fieldtype": "Button",
+   "label": "Perfil de ERP"
+  },
+  {
+   "fieldname": "user_instance",
+   "fieldtype": "Link",
+   "label": "Aula Virtual",
+   "options": "Moodle Instance"
+  },
+  {
+   "fieldname": "moodle_user_id",
+   "fieldtype": "Data",
+   "label": "Moodle User ID",
+   "unique": 1
+  },
+  {
+   "default": "Estudiante",
+   "fieldname": "user_type",
+   "fieldtype": "Select",
+   "label": "Tipo de Usuario",
+   "options": "Estudiante\nProfesor\nProfesor Editor"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-03 20:05:07.789622",
+ "modified": "2024-11-28 11:13:11.371216",
  "modified_by": "Administrator",
  "module": "Moodle Integration",
  "name": "Moodle User",

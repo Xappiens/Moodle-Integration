@@ -5,36 +5,28 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "course_status",
   "course_name",
   "course_instance",
+  "course_category",
   "course_code",
   "course_start_date",
   "course_end_date",
   "section_break_xtcy",
-  "estudiantes",
+  "course_groups",
+  "course_students",
   "course_teachers"
  ],
  "fields": [
   {
    "fieldname": "course_code",
    "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "C\u00f3digo del Curso",
-   "reqd": 1
+   "label": "C\u00f3digo del Curso"
   },
   {
    "fieldname": "course_name",
    "fieldtype": "Small Text",
    "in_list_view": 1,
-   "label": "Nombre del Curso",
-   "reqd": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "course_status",
-   "fieldtype": "Check",
-   "label": "Habilitado"
+   "label": "Nombre del Curso"
   },
   {
    "fieldname": "course_start_date",
@@ -49,31 +41,41 @@
   {
    "fieldname": "course_instance",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Aula Virtual",
-   "options": "Moodle Instance",
-   "reqd": 1
+   "options": "Moodle Instance"
   },
   {
    "fieldname": "section_break_xtcy",
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "estudiantes",
+   "fieldname": "course_teachers",
+   "fieldtype": "Table",
+   "label": "Profesores",
+   "options": "Moodle Teachers Course"
+  },
+  {
+   "fieldname": "course_groups",
+   "fieldtype": "Table",
+   "label": "Grupos de Estudiantes",
+   "options": "Moodle Course Group Groups"
+  },
+  {
+   "fieldname": "course_students",
    "fieldtype": "Table",
    "label": "Estudiantes",
    "options": "Moodle Students Course"
   },
   {
-   "fieldname": "course_teachers",
-   "fieldtype": "Table",
-   "label": "Profesores",
-   "options": "Moodle Teachers Course"
+   "fieldname": "course_category",
+   "fieldtype": "Link",
+   "label": "Categor\u00eda del Curso",
+   "options": "Moodle Course Category"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-02 11:55:23.695401",
+ "modified": "2024-12-05 12:03:29.127612",
  "modified_by": "Administrator",
  "module": "Moodle Integration",
  "name": "Moodle Course",

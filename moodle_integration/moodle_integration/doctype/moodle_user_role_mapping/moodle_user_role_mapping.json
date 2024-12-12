@@ -1,36 +1,43 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2024-10-31 14:39:31.611342",
+ "creation": "2024-11-26 12:14:16.540407",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "user_student",
-  "user_group"
+  "role_shortname",
+  "role_name",
+  "role_id"
  ],
  "fields": [
   {
-   "fieldname": "user_student",
+   "fieldname": "role_shortname",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Usuario Estudiante",
-   "options": "Moodle User"
+   "label": "Nombre Corto de Rol",
+   "options": "Moodle User Role"
   },
   {
-   "fieldname": "user_group",
+   "fieldname": "role_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Grupo del Estudiante"
+   "label": "Nombre del Rol"
+  },
+  {
+   "fieldname": "role_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Identificador de Rol"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-11-28 12:52:00.364377",
+ "modified": "2024-11-26 12:18:17.158136",
  "modified_by": "Administrator",
  "module": "Moodle Integration",
- "name": "Moodle Students Course",
+ "name": "Moodle User Role Mapping",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

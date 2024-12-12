@@ -1,28 +1,24 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:role_name",
- "creation": "2024-10-31 11:56:14.763585",
+ "creation": "2024-11-19 15:11:00.215932",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "role_name"
+  "section_break_14ff"
  ],
  "fields": [
   {
-   "fieldname": "role_name",
-   "fieldtype": "Data",
-   "label": "Nombre del Rol",
-   "unique": 1
+   "fieldname": "section_break_14ff",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-31 14:03:22.708047",
+ "modified": "2024-11-19 15:11:00.215932",
  "modified_by": "Administrator",
  "module": "Moodle Integration",
- "name": "Moodle Role",
- "naming_rule": "By fieldname",
+ "name": "Moodle Event",
  "owner": "Administrator",
  "permissions": [
   {

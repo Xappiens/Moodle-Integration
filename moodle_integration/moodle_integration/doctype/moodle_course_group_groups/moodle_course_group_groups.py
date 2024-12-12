@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class MoodleRole(Document):
+class MoodleCourseGroupGroups(Document):
 	pass

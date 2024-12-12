@@ -1,0 +1,61 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-11-28 12:45:49.030834",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "group_name",
+  "group_moodle_id",
+  "group_course",
+  "group_instance"
+ ],
+ "fields": [
+  {
+   "fieldname": "group_name",
+   "fieldtype": "Data",
+   "label": "Nombre del Grupo"
+  },
+  {
+   "fieldname": "group_moodle_id",
+   "fieldtype": "Data",
+   "label": "Identificador de Moodle"
+  },
+  {
+   "fieldname": "group_course",
+   "fieldtype": "Link",
+   "label": "Acci\u00f3n Formativa",
+   "options": "Moodle Course"
+  },
+  {
+   "fieldname": "group_instance",
+   "fieldtype": "Link",
+   "label": "Aula Virtual",
+   "options": "Moodle Instance"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-11-28 13:01:08.889157",
+ "modified_by": "Administrator",
+ "module": "Moodle Integration",
+ "name": "Moodle Course Group",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
