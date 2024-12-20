@@ -101,7 +101,7 @@ def process_moodle_course(moodle_instance_name, course_id, api_url, token):
         course_doc.save(ignore_permissions=True)
         logs.append("  Grupos sincronizados correctamente.")
 
-        # Paso 3: Consultar y procesar participantes
+        # Paso 3: Crear o Actualizar Participantes
         participant_params = {
             "wstoken": token,
             "wsfunction": "core_enrol_get_enrolled_users",
@@ -110,35 +110,20 @@ def process_moodle_course(moodle_instance_name, course_id, api_url, token):
         }
         logs.append(f"\n[PARTICIPANTES] Consultando participantes en Moodle:")
         logs.append(f"  Parámetros: {participant_params}")
+        participant_response = requests.get(api_url, params=participant_params, timeout=30)
+        if participant_response.status_code != 200:
+            logs.append(f"  Error al consultar participantes: {participant_response.text}")
+            raise ValueError(f"Error al consultar participantes: {participant_response.status_code}")
+        participants = participant_response.json()
+        logs.append("  Participantes obtenidos:")
 
-        try:
-            participant_response = requests.get(api_url, params=participant_params, timeout=30)
-            if participant_response.status_code != 200:
-                logs.append(f"  Error al consultar participantes: {participant_response.text}")
-                raise ValueError(f"Error al consultar participantes: {participant_response.status_code}")
-            participants = participant_response.json()
-            if not participants:
-                raise ValueError("No se encontraron participantes en la respuesta de Moodle.")
-            logs.append("  Participantes obtenidos correctamente.")
-        except Exception as e:
-            logs.append(f"  [ERROR] No se pudo obtener participantes: {str(e)}")
-            frappe.log_error(
-                message="\n".join(logs),
-                title=f"Error al consultar participantes en el curso {course_id}"
-            )
-            raise
-
-        # Diccionarios para mapeo y evitar duplicados
-        student_mapping = {}
-        teacher_mapping = {}
-
+        # Validar y guardar estudiantes con grupos
         for participant in participants:
             user_id = participant.get("username")
             user_name = f"{participant.get('firstname')} {participant.get('lastname')}"
             roles = [role.get("shortname") for role in participant.get("roles", [])]
             logs.append(f"    - Nombre: {user_name}, ID: {user_id}, Roles: {roles}")
 
-            # Obtener o crear el usuario en Moodle User
             user_identifier = f"{moodle_instance_name} {user_id}"
             if frappe.db.exists("Moodle User", {"name": user_identifier}):
                 user_doc = frappe.get_doc("Moodle User", user_identifier)
@@ -157,40 +142,39 @@ def process_moodle_course(moodle_instance_name, course_id, api_url, token):
                 user_doc.save(ignore_permissions=True)
                 logs.append(f"      Usuario creado: {user_identifier}")
 
-            # Determinar el último grupo del usuario
-            last_group_name = None
+            # Validar grupos asignados
+            valid_groups = []
             for group in participant.get("groups", []):
                 group_id = str(group["id"])
                 if group_id in group_mapping:
                     group_name = group_mapping[group_id]
                     if frappe.db.exists("Moodle Course Group", {"name": group_name}):
-                        last_group_name = group_name
-                        logs.append(f"      Último grupo asociado: {group_name}")
+                        valid_groups.append(group_name)
+                        logs.append(f"      Asociado al grupo: {group_name}")
                     else:
                         logs.append(f"      [ADVERTENCIA] Grupo no encontrado en la base de datos: {group_name}")
                 else:
                     logs.append(f"      [ADVERTENCIA] Grupo con ID {group_id} no encontrado en el mapeo.")
 
-            # Añadir o actualizar estudiantes
-            if "student" in roles:
-                existing_student = next((row for row in course_doc.get("course_students", []) if row.user_student == user_doc.name), None)
-                if existing_student:
-                    existing_student.user_group = last_group_name  # Actualizar último grupo asignado
-                    logs.append(f"      Estudiante existente actualizado: {user_identifier}, Último grupo: {last_group_name}")
-                else:
-                    course_doc.append("course_students", {"user_student": user_doc.name, "user_group": last_group_name})
-                    logs.append(f"      Estudiante añadido: {user_identifier}, Último grupo: {last_group_name}")
+            # Crear entradas individuales para cada grupo si necesario
+            if valid_groups:
+                for group_name in valid_groups:
+                    student_entry = {
+                        "user_student": user_doc.name,
+                        "user_group": group_name
+                    }
+                    course_doc.append("course_students", student_entry)
+                    logs.append(f"      Estudiante añadido: {user_identifier}, Grupo: {group_name}")
+            else:
+                logs.append(f"      [ADVERTENCIA] Sin grupos válidos asignados para {user_identifier}")
 
-            # Añadir o actualizar profesores
+            # Agregar roles de profesor si aplica
             if "teacher" in roles or "editingteacher" in roles:
-                existing_teacher = next((row for row in course_doc.get("course_teachers", []) if row.user_teacher == user_doc.name), None)
-                if not existing_teacher:
+                if user_doc.name not in [row.user_teacher for row in course_doc.get("course_teachers", [])]:
                     course_doc.append("course_teachers", {"user_teacher": user_doc.name})
                     logs.append(f"      Profesor añadido: {user_identifier}")
-                else:
-                    logs.append(f"      Profesor existente encontrado: {user_identifier}, No se requiere acción adicional.")
 
-        # Guardar el documento del curso
+        # Guardar el documento del curso con validación
         try:
             course_doc.save(ignore_permissions=True)
             logs.append("  Participantes sincronizados correctamente.")
@@ -202,17 +186,6 @@ def process_moodle_course(moodle_instance_name, course_id, api_url, token):
             )
             raise
 
-        # Guardar el documento del curso
-        try:
-            course_doc.save(ignore_permissions=True)
-            logs.append("  Participantes sincronizados correctamente.")
-        except Exception as save_error:
-            logs.append(f"  [ERROR] No se pudo guardar el curso: {str(save_error)}")
-            frappe.log_error(
-                message="\n".join(logs),
-                title=f"Error al guardar participantes en el curso {course_id}"
-            )
-            raise
 
         # Registrar log final
         frappe.log_error(
