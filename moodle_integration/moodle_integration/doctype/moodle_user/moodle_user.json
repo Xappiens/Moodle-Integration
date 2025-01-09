@@ -6,8 +6,6 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "user_profile",
-  "perfil_de_erp",
   "user_name",
   "user_surname",
   "user_fullname",
@@ -19,6 +17,7 @@
   "moodle_user_id",
   "user_instance",
   "user_type",
+  "user_connection_status",
   "moodle_user_course"
  ],
  "fields": [
@@ -70,16 +69,6 @@
    "options": "Moodle User Course"
   },
   {
-   "fieldname": "user_profile",
-   "fieldtype": "Button",
-   "label": "Perfil de Moodle"
-  },
-  {
-   "fieldname": "perfil_de_erp",
-   "fieldtype": "Button",
-   "label": "Perfil de ERP"
-  },
-  {
    "fieldname": "user_instance",
    "fieldtype": "Link",
    "label": "Aula Virtual",
@@ -97,11 +86,17 @@
    "fieldtype": "Select",
    "label": "Tipo de Usuario",
    "options": "Estudiante\nProfesor\nProfesor Editor"
+  },
+  {
+   "fieldname": "user_connection_status",
+   "fieldtype": "Select",
+   "label": "Estado de Conexi\u00f3n",
+   "options": "Desconectado\nConectado"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-28 11:13:11.371216",
+ "modified": "2025-01-08 15:04:25.576580",
  "modified_by": "Administrator",
  "module": "Moodle Integration",
  "name": "Moodle User",

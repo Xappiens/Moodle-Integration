@@ -76,27 +76,42 @@ def process_moodle_course(moodle_instance_name, course_id, api_url, token):
             group_id = str(group.get("id"))
             group_name = group.get("name")
             logs.append(f"    - ID: {group_id}, Nombre: {group_name}")
-            group_identifier = f"{moodle_instance_name} {course_id} {group_name}"
+            
+            # Generar identificador único del grupo
+            group_identifier = f"{course_doc.name} {group_name}"
 
+            # Verificar si ya existe un grupo con el mismo nombre
             if frappe.db.exists("Moodle Course Group", {"name": group_identifier}):
+                logs.append(f"Grupo ya existente: {group_identifier}.")
                 group_doc = frappe.get_doc("Moodle Course Group", {"name": group_identifier})
-                logs.append(f"      Existente: {group_identifier}")
             else:
+                # Crear nuevo grupo
                 group_doc = frappe.new_doc("Moodle Course Group")
                 group_doc.name = group_identifier
                 group_doc.update({
                     "group_name": group_name,
                     "group_instance": moodle_instance_name,
                     "group_course": course_doc.name,
-                    "group_moodle_id": group_id
+                    "group_moodle_id": group_id  # Considerar este campo para garantizar unicidad
                 })
-                group_doc.save(ignore_permissions=True)
-                logs.append(f"      Creado: {group_identifier}")
+                try:
+                    group_doc.save(ignore_permissions=True)
+                    logs.append(f"Grupo creado: {group_identifier}.")
+                except Exception as e:
+                    logs.append(f"Error al guardar el grupo: {str(e)}")
+                    frappe.log_error(
+                        message=f"Error al guardar grupo {group_identifier}: {str(e)}",
+                        title="Error de sincronización de grupos"
+                    )
 
+            # Actualizar mapeo de grupos
             group_mapping[group_id] = group_doc.name
+
+            # Asociar grupo al curso si no está ya asociado
             if group_doc.name not in [row.course_group for row in course_doc.get("course_groups", [])]:
                 course_doc.append("course_groups", {"course_group": group_doc.name})
-                logs.append(f"      Asociado al curso.")
+                logs.append(f"Grupo asociado al curso: {group_doc.name}")
+
 
         course_doc.save(ignore_permissions=True)
         logs.append("  Grupos sincronizados correctamente.")
@@ -116,10 +131,24 @@ def process_moodle_course(moodle_instance_name, course_id, api_url, token):
             if participant_response.status_code != 200:
                 logs.append(f"  Error al consultar participantes: {participant_response.text}")
                 raise ValueError(f"Error al consultar participantes: {participant_response.status_code}")
+            
             participants = participant_response.json()
             if not participants:
-                raise ValueError("No se encontraron participantes en la respuesta de Moodle.")
-            logs.append("  Participantes obtenidos correctamente.")
+                # Log de advertencia si no hay participantes
+                warning_message = f"No se encontraron participantes en el curso {course_id}. Esto puede ser normal si el curso aún no tiene inscritos."
+                logs.append(f"  [ADVERTENCIA] {warning_message}")
+                frappe.log_error(
+                    message="\n".join(logs),
+                    title=f"Advertencia: Sin participantes en el curso {course_id}"
+                )
+            else:
+                logs.append("  Participantes obtenidos correctamente.")
+            
+            # Continuar con el procesamiento normal si hay participantes
+            for participant in participants:
+                # Procesar participantes aquí
+                pass
+
         except Exception as e:
             logs.append(f"  [ERROR] No se pudo obtener participantes: {str(e)}")
             frappe.log_error(
@@ -127,6 +156,7 @@ def process_moodle_course(moodle_instance_name, course_id, api_url, token):
                 title=f"Error al consultar participantes en el curso {course_id}"
             )
             raise
+
 
         # Diccionarios para mapeo y evitar duplicados
         student_mapping = {}
@@ -146,13 +176,24 @@ def process_moodle_course(moodle_instance_name, course_id, api_url, token):
             else:
                 user_doc = frappe.new_doc("Moodle User")
                 user_doc.name = user_identifier
+                
+                # Obtener roles del usuario desde Moodle
+                roles = user_data.get("roles", [])
+                if any(role.get("shortname") == "editingteacher" for role in roles):
+                    user_type = "Profesor Editor"
+                elif any(role.get("shortname") == "teacher" for role in roles):
+                    user_type = "Profesor"
+                else:
+                    user_type = "Estudiante"  # Valor predeterminado
+
+                # Actualizar el documento del usuario con el rol correcto
                 user_doc.update({
-                    "moodle_user_id": participant.get("id"),
-                    "user_id": user_id,
-                    "user_email": participant.get("email"),
-                    "user_name": participant.get("firstname"),
-                    "user_surname": participant.get("lastname"),
-                    "user_instance": moodle_instance_name
+                    "user_name": user_data.get("firstname"),
+                    "user_surname": user_data.get("lastname"),
+                    "user_fullname": f"{user_data.get('firstname')} {user_data.get('lastname')}",  # Combina nombre y apellidos.
+                    "user_email": user_data.get("email"),
+                    "user_instance": moodle_instance_name,
+                    "user_type": user_type
                 })
                 user_doc.save(ignore_permissions=True)
                 logs.append(f"      Usuario creado: {user_identifier}")

@@ -37,7 +37,24 @@ def process_moodle_category(moodle_instance_name, category_id, api_url, token):
                 parent_category_name = parent_category_doc
                 logs.append(f"Categoría padre encontrada: {parent_category_name}.")
             else:
-                logs.append(f"Advertencia: No se encontró la Categoría Padre con ID {parent_id} en ERPNext.")
+                if parent_id == "0":  # Considerar 0 como categoría "Superior" en Moodle
+                    parent_category_name = None  # O un nombre predeterminado si es necesario
+                    logs.append(f"La categoría padre es 'Superior' en Moodle, no se asignará categoría padre.")
+                else:
+                    logs.append(f"No se encontró la Categoría Padre con ID {parent_id} en ERPNext. Creando la categoría padre.")
+                    parent_identifier = f"{moodle_instance_name} {parent_id}"
+                    if not frappe.db.exists("Moodle Course Category", {"name": parent_identifier}):
+                        parent_doc = frappe.new_doc("Moodle Course Category")
+                        parent_doc.name = parent_identifier
+                        parent_doc.update({
+                            "coursecat_id": parent_id,
+                            "coursecat_name": f"Parent {parent_id}",  # Nombre genérico o personalizable
+                            "coursecat_instance": moodle_instance_name
+                        })
+                        parent_doc.save(ignore_permissions=True)
+                        logs.append(f"Categoría padre creada: {parent_identifier}.")
+                    parent_category_name = parent_identifier
+
 
         # Crear o Actualizar la categoría en ERPNext
         category_identifier = f"{moodle_instance_name} {category_id}"
