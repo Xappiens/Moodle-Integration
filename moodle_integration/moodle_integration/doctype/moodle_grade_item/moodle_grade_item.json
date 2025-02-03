@@ -1,0 +1,72 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-01-31 09:06:32.024785",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "grade_item_name",
+  "grade_item_course",
+  "grade_item_max_grade",
+  "grade_item_min_grade",
+  "grade_item_weight",
+  "grade_item_category"
+ ],
+ "fields": [
+  {
+   "fieldname": "grade_item_name",
+   "fieldtype": "Data",
+   "label": "Nombre de la Actividad"
+  },
+  {
+   "fieldname": "grade_item_course",
+   "fieldtype": "Link",
+   "label": "Curso",
+   "options": "Moodle Course"
+  },
+  {
+   "fieldname": "grade_item_max_grade",
+   "fieldtype": "Float",
+   "label": "Nota M\u00e1xima"
+  },
+  {
+   "fieldname": "grade_item_min_grade",
+   "fieldtype": "Float",
+   "label": "Nota M\u00ednima"
+  },
+  {
+   "fieldname": "grade_item_weight",
+   "fieldtype": "Float",
+   "label": "Peso de la Actividad"
+  },
+  {
+   "fieldname": "grade_item_category",
+   "fieldtype": "Data",
+   "label": "Categor\u00eda de la Actividad"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-01-31 09:19:59.776502",
+ "modified_by": "Administrator",
+ "module": "Moodle Integration",
+ "name": "Moodle Grade Item",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

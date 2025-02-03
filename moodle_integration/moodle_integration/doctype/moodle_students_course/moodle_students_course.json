@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "user_student",
+  "user_dni",
   "user_group"
  ],
  "fields": [
@@ -23,12 +24,20 @@
    "in_list_view": 1,
    "label": "Grupo del Estudiante",
    "options": "Moodle Course Group"
+  },
+  {
+   "fetch_from": "user_student.user_dni",
+   "fieldname": "user_dni",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "DNI",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-12-30 14:34:25.936178",
+ "modified": "2025-01-27 09:14:14.831892",
  "modified_by": "Administrator",
  "module": "Moodle Integration",
  "name": "Moodle Students Course",

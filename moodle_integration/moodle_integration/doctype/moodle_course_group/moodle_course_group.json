@@ -19,24 +19,28 @@
   {
    "fieldname": "group_moodle_id",
    "fieldtype": "Data",
-   "label": "Identificador de Moodle"
+   "in_list_view": 1,
+   "label": "Identificador de Moodle",
+   "reqd": 1
   },
   {
    "fieldname": "group_course",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Acci\u00f3n Formativa",
-   "options": "Moodle Course"
+   "options": "Moodle Course",
+   "reqd": 1
   },
   {
    "fieldname": "group_instance",
    "fieldtype": "Link",
-   "label": "Aula Virtual",
+   "label": "Instancia de Moodle",
    "options": "Moodle Instance"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-28 13:01:08.889157",
+ "modified": "2025-01-27 11:57:24.241721",
  "modified_by": "Administrator",
  "module": "Moodle Integration",
  "name": "Moodle Course Group",

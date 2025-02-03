@@ -13,8 +13,8 @@
   "user_phone",
   "user_email",
   "user_birthdate",
-  "user_id",
   "moodle_user_id",
+  "user_id",
   "user_instance",
   "user_type",
   "user_connection_status",
@@ -24,7 +24,7 @@
   {
    "fieldname": "user_id",
    "fieldtype": "Data",
-   "label": "Nombre de Usuario",
+   "label": "Moodle User ID",
    "unique": 1
   },
   {
@@ -77,7 +77,7 @@
   {
    "fieldname": "moodle_user_id",
    "fieldtype": "Data",
-   "label": "Moodle User ID",
+   "label": "Nombre de Usuario",
    "unique": 1
   },
   {
@@ -96,7 +96,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-01-08 15:04:25.576580",
+ "modified": "2025-01-27 09:32:11.943486",
  "modified_by": "Administrator",
  "module": "Moodle Integration",
  "name": "Moodle User",

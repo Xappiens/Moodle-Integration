@@ -1,0 +1,61 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-01-31 09:20:35.653527",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "grade_student",
+  "grade_item",
+  "grade",
+  "grade_feedback"
+ ],
+ "fields": [
+  {
+   "fieldname": "grade_student",
+   "fieldtype": "Link",
+   "label": "Estudiante",
+   "options": "Moodle User"
+  },
+  {
+   "fieldname": "grade_item",
+   "fieldtype": "Link",
+   "label": "Actividad",
+   "options": "Moodle Grade Item"
+  },
+  {
+   "fieldname": "grade",
+   "fieldtype": "Float",
+   "label": "Calificaci\u00f3n"
+  },
+  {
+   "fieldname": "grade_feedback",
+   "fieldtype": "Small Text",
+   "label": "Comentario"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-01-31 15:28:10.228582",
+ "modified_by": "Administrator",
+ "module": "Moodle Integration",
+ "name": "Moodle Student Grade",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
