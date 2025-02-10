@@ -2,6 +2,8 @@ import frappe
 from urllib.parse import unquote, urlparse
 from moodle_integration.scripts.moodle_user_sync import process_moodle_user
 from moodle_integration.scripts.moodle_course_sync import process_moodle_course
+from moodle_integration.scripts.moodle_category_sync import process_moodle_category
+
 
 @frappe.whitelist(allow_guest=True)
 def handle_moodle_data(**kwargs):
@@ -30,33 +32,37 @@ def handle_moodle_data(**kwargs):
             moodle_api_url = f"https://{moodle_api_url}"
         api_url = f"{moodle_api_url}/webservice/rest/server.php"
 
-        # Procesar datos de usuario
-        user_id = kwargs.get("user_id")
-        if user_id:
-            response = process_moodle_user(
-                moodle_instance_name=moodle_instance["name"],
-                user_id=user_id,
-                api_url=api_url,
-                token=moodle_instance["api_key"]
-            )
-            if response.get("status") == "success":
-                return {"status": "success", "message": f"Usuario sincronizado: {user_id}"}
-            else:
-                return {"status": "error", "message": response.get("message", "Error desconocido en sincronización de usuario.")}
+        # Diccionario de redirección
+        handlers = {
+            "user_id": {
+                "function": process_moodle_user,
+                "param_key": "user_id"
+            },
+            "course_id": {
+                "function": process_moodle_course,
+                "param_key": "course_id"
+            },
+            "object_id": {
+                "function": process_moodle_category,
+                "param_key": "category_id",
+                "condition": kwargs.get("object_type") == "course_categories"
+            }
+        }
 
-        # Procesar datos de curso
-        course_id = kwargs.get("course_id")
-        if course_id:
-            response = process_moodle_course(
-                moodle_instance_name=moodle_instance["name"],
-                course_id=course_id,
-                api_url=api_url,
-                token=moodle_instance["api_key"]
-            )
-            if response.get("status") == "success":
-                return {"status": "success", "message": f"Curso sincronizado: {course_id}"}
-            else:
-                return {"status": "error", "message": response.get("message", "Error desconocido en sincronización de curso.")}
+        # Iterar sobre los handlers para procesar los datos
+        for key, handler in handlers.items():
+            param_value = kwargs.get(handler["param_key"]) if key != "object_id" else kwargs.get("object_id")
+            if param_value and (handler.get("condition", True)):
+                response = handler["function"](
+                    moodle_instance_name=moodle_instance["name"],
+                    **{handler["param_key"]: param_value},  # Cambiar clave a 'category_id'
+                    api_url=api_url,
+                    token=moodle_instance["api_key"]
+                )
+                if response.get("status") == "success":
+                    return {"status": "success", "message": f"Sincronización completada para {key}: {param_value}"}
+                else:
+                    return {"status": "error", "message": response.get("message", "Error desconocido durante la sincronización.")}
 
         return {"status": "error", "message": "No se reconoció un tipo de dato válido para sincronización."}
 

@@ -12,7 +12,7 @@
   "course_start_date",
   "course_end_date",
   "section_break_byjw",
-  "course_subjects",
+  "course_grade_item",
   "section_break_xtcy",
   "course_groups",
   "course_students",
@@ -81,15 +81,15 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "course_subjects",
+   "fieldname": "course_grade_item",
    "fieldtype": "Table",
-   "label": "Asignaturas",
-   "options": "Moodle Course Subjects"
+   "label": "Actividades",
+   "options": "Moodle Course Grade Item"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-01-27 12:28:48.144141",
+ "modified": "2025-02-04 11:12:28.208697",
  "modified_by": "Administrator",
  "module": "Moodle Integration",
  "name": "Moodle Course",

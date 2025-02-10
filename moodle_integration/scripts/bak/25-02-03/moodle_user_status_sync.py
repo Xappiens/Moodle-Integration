@@ -1,18 +1,20 @@
 import frappe
 from urllib.parse import unquote, urlparse
-from datetime import datetime
 
 @frappe.whitelist(allow_guest=True)
 def update_user_connection_status(user_id=None, moodle_url=None, action=None):
     """
     Actualiza el estado de conexión de un usuario de Moodle en Frappe.
-    Guarda la fecha y hora de la conexión en el campo `user_connection_status` del usuario en Moodle User.
+    Identifica al usuario usando user_id y construye el name del Moodle User basado en {user_instance} {moodle_user_id}.
     """
-    if not moodle_url or not user_id or action != "connect":
-        return {"status": "error", "message": "Parámetros insuficientes o acción no permitida."}
+    if not moodle_url or not user_id or action not in ["connect", "disconnect"]:
+        return {"status": "error", "message": "Parámetros insuficientes."}
 
     # Procesar el dominio de la URL
     domain = urlparse(unquote(moodle_url).rstrip("/")).netloc.replace("https://", "").replace("http://", "").strip("/")
+
+    # Determinar el estado basado en la acción
+    status = "Conectado" if action == "connect" else "Desconectado"
 
     # Buscar directamente los datos necesarios de Moodle Instance y Moodle User en una sola consulta
     moodle_user_data = frappe.db.sql("""
@@ -35,14 +37,13 @@ def update_user_connection_status(user_id=None, moodle_url=None, action=None):
 
     moodle_user = moodle_user_data[0]  # Tomar el único resultado esperado
 
-    # Registrar la fecha y hora actuales en `user_connection_status`
-    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    frappe.db.set_value("Moodle User", moodle_user["user_name"], "user_connection_status", now)
+    # Actualizar el estado de conexión
+    frappe.db.set_value("Moodle User", moodle_user["user_name"], "user_connection_status", status)
 
     # Log opcional para depuración
     frappe.log_error(
-        f"Estado actualizado: {moodle_user['user_name']} a '{now}'.",
-        f"Estado de Usuario - {moodle_user['user_name']} (Conectado)"
+        f"Estado actualizado: {moodle_user['user_name']} a '{status}'.",
+        f"Estado de Usuario - {moodle_user['user_name']} ({status})"
     )
 
-    return {"status": "success", "message": f"Estado actualizado a '{now}' para {moodle_user['user_name']}."}
+    return {"status": "success", "message": f"Estado actualizado a '{status}' para {moodle_user['user_name']}."}

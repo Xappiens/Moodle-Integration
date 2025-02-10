@@ -3,32 +3,40 @@ import requests
 from datetime import datetime
 
 @frappe.whitelist(allow_guest=True)
-def process_moodle_course(moodle_instance_name, course_id, api_url, token):
-    # Inicializar un registro de logs para registrar el proceso
-    logs = [
-        f"Iniciando sincronización para el curso {course_id} en {moodle_instance_name}."
-    ]
-    
+def process_moodle_course(moodle_instance_name, course_id, api_url, token, action):
+    """
+    Sincroniza un curso de Moodle con Frappe basado en su ID único de Moodle (course_id).
+    Soporta create_course, update_course y delete_course.
+    """
+    logs = [f"Iniciando {action} para el curso con ID {course_id} en {moodle_instance_name}."]
+
     try:
-        # Función auxiliar para realizar solicitudes HTTP al API de Moodle
+        # Generar identificador único del curso
+        course_identifier = f"{moodle_instance_name} {course_id}"
+        logs.append(f"Identificador del curso: {course_identifier}")
+
+        # Manejo de eliminación de curso
+        if action == "delete_course":
+            if frappe.db.exists("Moodle Course", {"name": course_identifier}):
+                frappe.delete_doc("Moodle Course", course_identifier)
+                logs.append(f"Curso {course_identifier} eliminado en ERPNext.")
+            else:
+                logs.append(f"El curso {course_identifier} no existe en ERPNext, no es necesario eliminarlo.")
+
+            return {"status": "success", "message": "Proceso de eliminación completado.", "logs": logs}
+
+        # Si es create_course o update_course, proceder con la sincronización
         def fetch_data(api_params, description):
             logs.append(f"\n[{description}] Consultando datos:")
             logs.append(f"  Parámetros: {api_params}")
             response = requests.get(api_url, params=api_params, timeout=30)
             if response.status_code != 200:
                 logs.append(f"  Error en la consulta: {response.text}")
-                raise ValueError(
-                    f"Error al consultar {description}: {response.status_code}"
-                )
+                raise ValueError(f"Error al consultar {description}: {response.status_code}")
             return response.json()
 
-        # Función auxiliar para convertir un timestamp Unix a una fecha legible
         def convert_unix_to_date(unix_timestamp):
-            return (
-                datetime.utcfromtimestamp(unix_timestamp).strftime('%Y-%m-%d')
-                if unix_timestamp
-                else None
-            )
+            return datetime.utcfromtimestamp(unix_timestamp).strftime('%Y-%m-%d') if unix_timestamp else None
 
         # Paso 1: Obtener datos del curso desde Moodle
         course_params = {
@@ -39,17 +47,23 @@ def process_moodle_course(moodle_instance_name, course_id, api_url, token):
         }
         course_data = fetch_data(course_params, "curso")[0]
 
-        # Convertir fechas de inicio y fin del curso
         course_start_date = convert_unix_to_date(course_data.get("startdate"))
         course_end_date = convert_unix_to_date(course_data.get("enddate"))
-        course_identifier = f"{moodle_instance_name} {course_id}"
 
-        # Crear o actualizar el documento del curso en ERPNext
+        # Verificar si el curso ya existe en ERPNext
+        course_exists = frappe.db.exists("Moodle Course", {"name": course_identifier})
+
+        # Obtener o crear el documento del curso en ERPNext
         course_doc = (
             frappe.get_doc("Moodle Course", course_identifier)
-            if frappe.db.exists("Moodle Course", {"name": course_identifier})
+            if course_exists
             else frappe.new_doc("Moodle Course")
         )
+
+        logs.append(
+            f"{'Actualizando' if course_exists else 'Creando'} curso en ERPNext: {course_identifier}."
+        )
+
         course_doc.update({
             "course_name": course_data.get("fullname"),
             "course_code": course_id,
@@ -71,13 +85,12 @@ def process_moodle_course(moodle_instance_name, course_id, api_url, token):
             "courseid": course_id,
         }
         groups = fetch_data(group_params, "grupos")
-        group_mapping = {}  # Mapear IDs de Moodle a nombres de grupos en ERPNext
+        group_mapping = {}
 
         for group in groups:
             group_id, group_name = str(group["id"]), group["name"]
             group_identifier = f"{course_doc.name} {group_name}"
 
-            # Crear o actualizar el documento del grupo en ERPNext
             group_doc = (
                 frappe.get_doc("Moodle Course Group", {"name": group_identifier})
                 if frappe.db.exists("Moodle Course Group", {"name": group_identifier})
@@ -91,11 +104,8 @@ def process_moodle_course(moodle_instance_name, course_id, api_url, token):
             })
             group_doc.save(ignore_permissions=True)
 
-            # Actualizar el mapeo y asociar el grupo al curso
             group_mapping[group_id] = group_doc.name
-            if group_doc.name not in [
-                row.course_group for row in course_doc.get("course_groups", [])
-            ]:
+            if group_doc.name not in [row.course_group for row in course_doc.get("course_groups", [])]:
                 course_doc.append("course_groups", {"course_group": group_doc.name})
 
         course_doc.save(ignore_permissions=True)
@@ -114,85 +124,56 @@ def process_moodle_course(moodle_instance_name, course_id, api_url, token):
             logs.append(f"[ADVERTENCIA] No se encontraron participantes en el curso {course_id}.")
         else:
             for participant in participants:
-                user_id = participant.get("id")  # Identificador numérico único de Moodle
-                moodle_user_id = participant.get("username")  # Nombre de usuario en Moodle
-                first_name = participant.get("firstname")
-                last_name = participant.get("lastname")
-                email = participant.get("email")
-                dni = participant.get("idnumber")  # DNI proporcionado por Moodle
-                birthdate = participant.get("birthdate")  # Fecha de nacimiento (puede requerir conversión de UNIX)
-                phone = participant.get("phone")  # Teléfono, si está disponible
-                user_identifier = f"{moodle_instance_name} {moodle_user_id}"  # Formato del name basado en `moodle_user_id`
+                user_identifier = f"{moodle_instance_name} {participant.get('username')}"
+                user_doc = (
+                    frappe.get_doc("Moodle User", user_identifier)
+                    if frappe.db.exists("Moodle User", {"name": user_identifier})
+                    else frappe.new_doc("Moodle User")
+                )
 
-                # Verificar si ya existe un usuario basado en el name o el user_id
-                existing_user = frappe.db.exists("Moodle User", {"name": user_identifier}) or \
-                                frappe.db.exists("Moodle User", {"user_id": user_id})
-
-                if existing_user:
-                    user_doc = frappe.get_doc("Moodle User", existing_user)
-                    logs.append(f"[INFO] Usuario encontrado y actualizado: {user_doc.name}")
+                # Definir user_type basado en roles de Moodle
+                user_roles = [role["shortname"] for role in participant.get("roles", [])]
+                if "editingteacher" in user_roles:
+                    user_type = "Profesor Editor"
+                elif "teacher" in user_roles:
+                    user_type = "Profesor"
                 else:
-                    user_doc = frappe.new_doc("Moodle User")
-                    user_doc.name = user_identifier  # Asignar el formato correcto del name
-                    logs.append(f"[INFO] Nuevo usuario creado: {user_identifier}")
+                    user_type = "Estudiante"
 
-                # Actualizar campos del usuario
                 user_doc.update({
-                    "user_id": user_id,  # Identificador numérico único de Moodle
-                    "moodle_user_id": moodle_user_id,  # Nombre de usuario en Moodle
-                    "user_name": first_name,
-                    "user_surname": last_name,
-                    "user_fullname": f"{first_name} {last_name}",
-                    "user_email": email,
-                    "user_dni": dni,
-                    "user_birthdate": datetime.utcfromtimestamp(birthdate).strftime('%Y-%m-%d') if birthdate else None,
-                    "user_phone": phone,
+                    "user_id": participant.get("id"),
+                    "moodle_user_id": participant.get("username"),
+                    "user_name": participant.get("firstname"),
+                    "user_surname": participant.get("lastname"),
+                    "user_fullname": f"{participant.get('firstname')} {participant.get('lastname')}",
+                    "user_email": participant.get("email"),
+                    "user_dni": participant.get("idnumber"),
+                    "user_phone": participant.get("phone"),
                     "user_instance": moodle_instance_name,
-                    "user_type": (
-                        "Profesor Editor" if any(role["shortname"] == "editingteacher" for role in participant.get("roles", []))
-                        else "Profesor" if any(role["shortname"] == "teacher" for role in participant.get("roles", []))
-                        else "Estudiante"
-                    ),
+                    "user_type": user_type
                 })
 
-                # Guardar el usuario
-                try:
-                    user_doc.save(ignore_permissions=True)
-                except frappe.ValidationError as e:
-                    logs.append(f"[ERROR] No se pudo guardar el usuario {user_identifier}: {str(e)}")
-                    continue
+                user_doc.save(ignore_permissions=True)
 
-                # Vincular al curso y grupo
-                last_group_name = next(
-                    (
-                        group_mapping[str(group["id"])]
-                        for group in participant.get("groups", [])
-                        if str(group["id"]) in group_mapping
-                    ),
-                    None,
+                # Vincular usuario a grupos en Moodle
+                for group in participant.get("groups", []):
+                    group_id = str(group["id"])
+                    if group_id in group_mapping:
+                        last_group_name = group_mapping[group_id]
+                        break
+                else:
+                    last_group_name = None
+
+                course_doc.append(
+                    "course_students" if user_type == "Estudiante" else "course_teachers",
+                    {"user_student" if user_type == "Estudiante" else "user_teacher": user_doc.name, "user_group": last_group_name}
                 )
-                if user_doc.user_type == "Estudiante":
-                    course_doc.append(
-                        "course_students",
-                        {"user_student": user_doc.name, "user_group": last_group_name},
-                    )
-                elif user_doc.user_type.startswith("Profesor"):
-                    course_doc.append(
-                        "course_teachers", {"user_teacher": user_doc.name}
-                    )
 
-            # Guardar el curso
             course_doc.save(ignore_permissions=True)
             logs.append("Participantes vinculados correctamente.")
 
-
-        # Registrar los logs como mensaje en ERPNext
-        frappe.log_error("\n".join(logs), f"Sincronización para el curso {course_id}")
         return {"status": "success", "message": "Sincronización completada.", "logs": logs}
 
     except Exception as e:
-        # Manejar errores y registrar logs
-        error_message = f"Error en process_moodle_course: {str(e)}"
-        logs.append(f"[ERROR] {error_message}")
-        frappe.log_error("\n".join(logs), f"Error en la sincronización del curso {course_id}")
+        logs.append(f"[ERROR] {str(e)}")
         return {"status": "error", "message": str(e), "logs": logs}
